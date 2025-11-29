@@ -75,4 +75,38 @@ class ClassroomController extends Controller
             return redirect()->back();
         }
     }
+
+    public function storeInformation(Request $request, $id)
+    {
+        $validation = $request->validate([
+            "content" => "required"
+        ]);
+
+        try {
+            $validation["user_id"] = Auth::user()->id;
+            $validation["classroom_id"] = $id;
+            $validation["type"] = "information";
+            Post::create($validation);
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            return redirect()->back();
+        }
+    }
+    
+    public function updateInformation(Request $request, $id)
+    {
+        $validation = $request->validate([
+            "content" => "required"
+        ]);
+
+        try {
+            $validation["user_id"] = Auth::user()->id;
+            $validation["classroom_id"] = $id;
+            $validation["type"] = "information";
+            Post::find($id)->update($validation);
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            return redirect()->back();
+        }
+    }
 }
