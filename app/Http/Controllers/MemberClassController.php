@@ -18,7 +18,7 @@ class MemberClassController extends Controller
         $members = MemberClass::with("user")->where("classroom_id", $id)->get();
         return view("classroom.member", compact("members", "author", "isAuthor", "id"));
     }
-    
+
     public function destroy($id, $id_user)
     {
         MemberClass::where("user_id", $id_user)->delete();
@@ -26,4 +26,3 @@ class MemberClassController extends Controller
         return redirect()->back();
     }
 }
-

@@ -4,7 +4,7 @@
              <div class="modal-body">
                  <h1 class="fw-bold fs-5">Kode Kelas</h1>
                  <div class="d-flex justify-content-center align-items-center py-5">
-                     <h1 class="fs-1 fw-bold">72gsh1</h1>
+                     <h1 class="fs-1 fw-bold">{{ $code }}</h1>
                  </div>
              </div>
          </div>

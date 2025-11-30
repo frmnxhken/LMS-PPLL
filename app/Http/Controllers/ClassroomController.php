@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Auth;
 
 class ClassroomController extends Controller
 {
-    #LMS-115 Show Classroom
     public function index()
     {
         $user_id = Auth::user()->id;
@@ -49,6 +48,22 @@ class ClassroomController extends Controller
         }
     }
 
+    public function out(Request $request, $id)
+    {
+        $userId = Auth::user()->id;
+        MemberClass::where("id", $id)->where("user_id", $userId)->delete();
+        return redirect("/");
+    }
+
+    public function show($id)
+    {
+        $userId = Auth::user()->id;
+        $isAuthor = $userId === Classroom::find($id)->user_id;
+        $classroom = Classroom::where("id", $id)->first();
+        $posts = Post::with("user")->where("classroom_id", $id)->orderBy("id", "DESC")->get();
+        return view("classroom.index", compact("classroom", "posts", "id", "isAuthor"));
+    }
+
     public function joinClass(Request $request)
     {
         $validation = $request->validate([
@@ -76,6 +91,13 @@ class ClassroomController extends Controller
         }
     }
 
+    public function deleteClass(Request $request, $id)
+    {
+        Classroom::where("id", $id)->delete();
+        MemberClass::where("classroom_id", $id)->delete();
+        return redirect("/");
+    }
+
     public function storeInformation(Request $request, $id)
     {
         $validation = $request->validate([
@@ -92,7 +114,7 @@ class ClassroomController extends Controller
             return redirect()->back();
         }
     }
-    
+
     public function updateInformation(Request $request, $id)
     {
         $validation = $request->validate([
@@ -107,6 +129,63 @@ class ClassroomController extends Controller
             return redirect()->back();
         } catch (\Throwable $th) {
             return redirect()->back();
+        }
+    }
+
+    public function setting($id)
+    {
+        $classroom = Classroom::where("id", $id)->first();
+        return view("classroom.setting", compact("classroom", "id"));
+    }
+
+    public function updateSetting(Request $request, $id)
+    {
+        $validation = $request->validate([
+            "name" => "required",
+            "description" => "required"
+        ]);
+
+        try {
+            Classroom::find($id)->update($validation);
+            return redirect()->route("home");
+        } catch (\Throwable $th) {
+            return redirect()->back();
+        }
+    }
+
+    protected function getRandomString($n)
+    {
+        return bin2hex(random_bytes($n / 2));
+    }
+
+    protected function getRandomColor()
+    {
+        $colors = ["bg-soft-green", "bg-soft-red", "bg-soft-blue", "bg-soft-orange", "bg-soft-purple"];
+        return $colors[array_rand($colors)];
+    }
+
+    private function generatePendingSubmissions(Classroom $classRoom, $user)
+    {
+        $now = now();
+
+        $assignments = $classRoom->posts()
+            ->where("type", "assignment")
+            ->where("due", ">", $now)
+            ->get();
+
+        foreach ($assignments as $assignment) {
+            $exists = Submission::where('post_id', $assignment->id)
+                ->where('user_id', $user->id)
+                ->exists();
+
+            if (!$exists) {
+                Submission::create([
+                    "post_id" => $assignment->id,
+                    "user_id" => $user->id,
+                    "status"  => "pending",
+                    "score"   => 0
+                ]);
+            }
         }
     }
 }

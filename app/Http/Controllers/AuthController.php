@@ -29,7 +29,13 @@ class AuthController extends Controller
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
     }
-        public function  store(Request $request)
+
+    public function register()
+    {
+        return view("auth.register");
+    }
+
+    public function store(Request $request)
     {
         $validation = $request->validate([
             "firstname" => "required",
@@ -49,6 +55,7 @@ class AuthController extends Controller
             return redirect()->back()->with("fail", "Registrasi Gagal");
         }
     }
+
     public function logout(Request $request)
     {
         Auth::guard("web")->logout();

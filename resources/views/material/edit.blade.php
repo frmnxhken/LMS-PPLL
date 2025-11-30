@@ -1,34 +1,18 @@
 <x-layout>
     <div class="mw-md py-4">
         <x-alert />
-        <form action="{{ route('updateAssignment', ['id' => $id, 'id_post' => $post->id]) }}" method="post" enctype="multipart/form-data" id="edit-material-form">
+        <form action="{{ route('updateMaterial', ['id' => $id, 'id_post' => $post->id]) }}" method="post" enctype="multipart/form-data" id="edit-material-form">
             @csrf
             @method('PUT')
 
             <div class="card p-4 mb-3">
                 <div class="mb-3">
-                    <label class="form-label">Judul tugas</label>
+                    <label class="form-label">Judul</label>
                     <input type="text" name="title" value="{{ $post->title }}" class="form-control">
                 </div>
-
                 <div class="mb-3">
-                    <label class="form-label">Tenggat</label>
-                    <input type="date" name="due" value="{{ $post->due }}" class="form-control @error('due') is-invalid @enderror">
-                    @error('due')
-                    <div class="invalid-feedback">
-                        {{ $message }}
-                    </div>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Petunjuk</label>
-                    <textarea class="form-control @error('content') is-invalid @enderror" name="content" rows="4" placeholder="Petunjuk pengerjaan..">{{ $post->content }}</textarea>
-                    @error('content')
-                    <div class="invalid-feedback">
-                        {{ $message }}
-                    </div>
-                    @enderror
+                    <label class="form-label">Deskripsi</label>
+                    <textarea name="content" rows="4" class="form-control">{{ $post->content }}</textarea>
                 </div>
             </div>
 

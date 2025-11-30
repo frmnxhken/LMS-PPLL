@@ -1,6 +1,6 @@
-
 <x-layout>
     <div class="mw-md py-4">
+        <x-alert />
         <form method="post" action="{{ route('storeMaterial', ['id' => $id]) }}" enctype="multipart/form-data">
             @csrf
             <div class="card p-4">

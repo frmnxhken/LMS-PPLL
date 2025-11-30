@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Classroom;
 use App\Models\Post;
 use App\Models\PostFile;
+use App\Models\Submission;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,11 +21,6 @@ class PostController extends Controller
         $post = Post::where("id", $id_post)->first();
         $postFiles = PostFile::where("post_id", $id_post)->get();
         return view("classroom.post-detail", compact("post", "postFiles", "id", "submission", "isAuthor"));
-    }
-
-    public function createAssignment($id)
-    {
-        return view("assignment.create", compact("id"));
     }
 
     public function createMaterial($id)
@@ -52,7 +49,51 @@ class PostController extends Controller
         $this->uploadPostFiles($request, $post);
         return redirect()->back()->with(["success" => "Material berhasil diupload!"]);
     }
-    
+
+    public function editMaterial($id, $id_post)
+    {
+        $post = Post::with("postFile")->where("id", $id_post)->first();
+        return view("material.edit", compact("post", "id", "id_post"));
+    }
+
+    public function updateMaterial(Request $request, $id, $id_post)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'nullable|string',
+            'files.*' => 'nullable|file|max:10240',
+        ]);
+
+        $post = Post::findOrFail($id_post);
+
+        $post->update([
+            'title' => $request->title,
+            'content' => $request->content,
+        ]);
+
+        if ($request->deleted_files) {
+            $ids = explode(',', $request->deleted_files);
+            foreach ($ids as $fileId) {
+                $file = PostFile::find($fileId);
+                if ($file) {
+                    Storage::delete($file->file_path);
+                    $file->delete();
+                }
+            }
+        }
+
+        if ($request->hasFile('files')) {
+            $this->uploadPostFiles($request, $post);
+        }
+
+        return redirect()->back()->with('success', 'Material berhasil diupdate!');
+    }
+
+    public function createAssignment($id)
+    {
+        return view("assignment.create", compact("id"));
+    }
+
     public function storeAssignment(Request $request, $id)
     {
         $request->validate([
@@ -133,6 +174,13 @@ class PostController extends Controller
         }
     }
 
+    public function deletePost(Request $request, $id, $id_post)
+    {
+        Post::where("id", $id_post)->delete();
+        Submission::where("post_id")->delete();
+        return redirect()->back();
+    }
+
     private function uploadPostFiles(Request $request, Post $post)
     {
         $uploadedFiles = [];
@@ -159,13 +207,6 @@ class PostController extends Controller
         }
 
         return $uploadedFiles;
-    }
-
-    public function deletePost(Request $request, $id, $id_post)
-    {
-        Post::where("id", $id_post)->delete();
-        Submission::where("post_id")->delete();
-        return redirect()->back();
     }
 
     public function deletePostFile($id, $id_file)

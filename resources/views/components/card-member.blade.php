@@ -1,17 +1,14 @@
+@props(['member', 'isAuthor', "id"])
 <div class="d-flex gap-3 align-items-center justify-content-between">
     <div class="d-flex gap-3 align-items-center">
-        <img class="rounded-circle object-fit-cover"
-            width="40"
-            height="40"
-            src="https://image.idntimes.com/post/20240603/tangkapan-layar-2024-06-03-pukul-164258-besar-d700cd64f60de196027d0e006f5c0eca.jpeg">
-
-        <p class="fs-6 mt-3">John Doe</p>
+        <img class="rounded-circle object-fit-cover" width="40" height="40" src="{{ $member->user->photo }}">
+        <p class="fs-6 mt-3">{{ $member->user->firstname." ".$member->user->lastname }}</p>
     </div>
-
-    <form action="" method="post">
-        <button onclick="return confirm('Anda yakin ingin menendangnya?')"
-            class="badge bg-danger border-0">
-            Kick
-        </button>
+    @if($isAuthor)
+    <form action="{{ route('bannedMember', ['id' => $id, 'id_user' => $member->user->id]) }}" method="post">
+        @csrf
+        @method('delete')
+        <button onclick="return confirm('Anda yakin ingin menendangnya?')" class="badge bg-danger border-0">Kick</button>
     </form>
+    @endif
 </div>
