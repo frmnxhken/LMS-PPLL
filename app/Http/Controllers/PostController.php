@@ -16,6 +16,33 @@ class PostController extends Controller
         return view("assignment.create", compact("id"));
     }
 
+    public function createMaterial($id)
+    {
+        return view("material.create", compact("id"));
+    }
+
+    public function storeMaterial(Request $request, $id)
+    {
+        $request->validate([
+            "title" => "required|string|max:255",
+            "content" => "nullable|string",
+            "files.*" => "nullable|file|max:10240"
+        ]);
+
+        $classroom = Classroom::where("id", $id)->first();
+
+        $post = Post::create([
+            "user_id" => Auth::user()->id,
+            "classroom_id" => $classroom->id,
+            "title" => $request->title,
+            "content" => $request->content,
+            "type" => "material",
+        ]);
+
+        $this->uploadPostFiles($request, $post);
+        return redirect()->back()->with(["success" => "Material berhasil diupload!"]);
+    }
+    
     public function storeAssignment(Request $request, $id)
     {
         $request->validate([
